@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+  <div>
+    <h4>Lista de Planetas</h4>
+    <p>Planetas cadastrado serão listados aqui</p>
+      <table class="table table-dark table-striped table-hover" >
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Nome</th>
+            <th scope="col">Clima</th>
+            <th scope="col">Terreno</th>
+            <th scope="col">Aparições em filmes</th>
+            <th scope="col">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="js-planet-list"/>
+      </table>
+  </div>
+{% endblock %}
+{% block js %}
+<script>
+
+  function createActions(planet) {
+    let actions = document.createElement('td')
+
+    // Delete Planet Action
+    let deletePlanetText = document.createTextNode("Deletar")
+    let deletePlanet = document.createElement('button')
+    deletePlanet.appendChild(deletePlanetText)
+    deletePlanet.classList = 'btn btn-danger'
+    deletePlanet.type = 'button'
+    
+    // Show Planet Action
+    let btnShowPlanetText = document.createTextNode("Ver")
+    let btnShowPlanet = document.createElement('a')
+    btnShowPlanet.appendChild(btnShowPlanetText)
+    btnShowPlanet.classList = 'btn btn-info'
+    btnShowPlanet.href = '/show/' + planet.id
+
+    // Add Actions
+    actions.appendChild(deletePlanet)
+    actions.appendChild(document.createTextNode(" "))
+    actions.appendChild(btnShowPlanet)
+
+    return actions
+  }
+
+
+
+  function addPlanet(planets) {
+    let table = document.getElementById('js-planet-list')
+    let header = Object.keys(planets[0])
+    planets.forEach(planet => {
+      let row = document.createElement('tr')
+      let tableContent = []
+      header.forEach(title => {
+        let content = document.createTextNode(planet[title])
+        let td = document.createElement('td')
+        td.appendChild(content)
+        switch(title){
+          case "id":
+            tableContent[0] = td
+            break
+          case "name":
+            tableContent[1] = td
+            break
+          case "climate":
+            tableContent[2] = td
+            break
+          case "terrain":
+            tableContent[3] = td
+            break
+          case "movies_appearances":
+            tableContent[4] = td
+        }
+      })
+      const actions = createActions(planet)
+      tableContent[5] = actions
+      tableContent.forEach(td => row.appendChild(td))
+      table.appendChild(row)
+    })
+
+  }
+
+  let requestHeaders = new Headers();
+  let request = { method: 'GET',
+               headers: requestHeaders,
+               mode: 'cors',
+               cache: 'default' };
+  fetch('http://localhost:5000/api/v1/planets', request)
+  .then(function(response) {
+    return response.json()
+  })
+  .then(function(res) {
+    addPlanet(res.planets)
+  })
+</script>
+
+{% endblock %}
+

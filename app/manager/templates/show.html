@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+  <div>
+    <h4>Dados sobre o planeta</h4>
+    <p>Planetas cadastrado serão listados aqui</p>
+    <div class="card" style="width: 18rem;">
+      <div class="card-body">
+        <h5 class="card-title" id="planet_name"></h5>
+        <p class="card-text" id="planet_climate"></p>
+        <p class="card-text" id="planet_terrain"></p>
+        <p class="card-text" id="planet_movies_appearances"></p>
+      </div>
+    </div>
+      
+  </div>
+{% endblock %}
+{% block js %}
+<script>
+  function setPlanet(planet){
+    let planetName = document.getElementById("planet_name")
+    let planetClimate = document.getElementById("planet_climate")
+    let planetTerrain = document.getElementById("planet_terrain")
+    let planetMoviesAppearances = document.getElementById("planet_movies_appearances")
+
+    planetName.appendChild(document.createTextNode(planet.name))
+    planetClimate.appendChild(document.createTextNode(planet.climate))
+    planetTerrain.appendChild(document.createTextNode(planet.terrain))
+    planetMoviesAppearances.appendChild(document.createTextNode(planet.movies_appearances))
+  }
+
+  let requestHeaders = new Headers();
+  let request = { method: 'GET',
+               headers: requestHeaders,
+               mode: 'cors',
+               cache: 'default' };
+  fetch('http://localhost:5000/api/v1/planets/{{planet_id}}', request)
+  .then(function(response) {
+    return response.json()
+  })
+  .then(function(res) {
+    setPlanet(res.planet)
+  })
+</script>
+
+{% endblock %}
+
