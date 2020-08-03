@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 
 from .utils.database import db
 
@@ -8,6 +9,7 @@ from .manager import manager_bp
 def create_app():
   from .utils.config import Config 
   app = Flask(__name__)
+  CORS(app)
   app.config.from_object(Config)
   db.init_app(app)
   with app.app_context():

@@ -42,13 +42,15 @@ def create_planet():
 
 @api_v1_bp.route('/planets', methods=["GET"])
 def get_planets():
-  search = request.args['search']
-  if(search):
+  if(len(request.args) > 0):
+    search = request.args['search']
     planets_query = Planet.query.filter_by(name=search.title())
+    total_docs = planets_query.count()
   else:  
     planets_query = Planet.query.all()
+    total_docs = len(planets_query)
   
-  if(planets_query.count() < 1):
+  if(total_docs < 1):
     return {'message': "Nenhum planeta encontrado!"}, 404
 
   planets = []
@@ -59,7 +61,7 @@ def get_planets():
 @api_v1_bp.route('/planets/<int:planet_id>', methods=["GET"])
 def get_planet_by_id(planet_id):
   planet_query = Planet.query.filter_by(id=planet_id).first()
-  if(planet_query.count() < 1):
+  if(planet_query == None):
     return {'message': "Planeta não encontrado!"}, 404
 
   planet = planet_query.to_dict()
