@@ -12,3 +12,7 @@ def list():
 @manager_bp.route('/show/<int:planet_id>', methods=["GET"])
 def show(planet_id):
   return render_template('show.html', planet_id=planet_id)
+
+@manager_bp.route('/create', methods=["GET"])
+def create():
+  return render_template('create.html')

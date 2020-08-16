@@ -11,6 +11,8 @@ api_timeout = 5
 @api_v1_bp.route('/planets', methods=["POST"])
 def create_planet():
   data = request.get_json()
+  
+  force_create = data['force'] if 'force' in data else False
 
   planet = Planet(
     name=data['name'],
@@ -20,15 +22,16 @@ def create_planet():
   try:
     r = requests.get(f'https://swapi.dev/api/planets/?search={planet.name}', timeout=api_timeout)
     planet_data = r.json()
-    if(len(planet_data['results']) <= 0):
+    any_planet = len(planet_data['results']) > 0
+    if(not any_planet and not force_create):
       return {'message': f'Não foi possível buscar a quantidade de\
- aparições para o planeta: {planet.name}',
+ aparições para o planeta: {planet.name}. Para forçar a criação utilize a chave "force" = true',
             'errors': [{'planetNotFound': planet.name}]}, 404
-    movies_appearances = len(planet_data['results'][0]['films'])
+    movies_appearances = len(planet_data['results'][0]['films']) if any_planet else 0
     planet.movies_appearances = movies_appearances
     db.session.add(planet)
     db.session.commit()
-    return {'message': 'OK!', 'data': planet.to_dict()}, 201
+    return {'message': f'O planeta {planet.name} foi criado com sucesso!', 'data': planet.to_dict()}, 201
   except requests.ConnectionError:
     return {'message': 'Resposta não recebida!',
             'errors': [{'ServerNotFound': f'Não foi possível se conectar com a API.'}]}, 502
