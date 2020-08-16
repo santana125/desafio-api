@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Cadastro{% endblock %}
+{% block content %}
+<div>
+  <h4>Cadastrar planeta</h4>
+  <p>Cadastre um novo planeta no sistema.</p>
+  <div class="container">
+    <div id="js-div-response"></div>
+    <form>
+    <div class="row gx-5">
+      <div class="col mb-3">
+        <label for="js-planet-name" class="form-label">Nome</label>
+        <input class="form-control" id="js-planet-name" placeholder="Ex. Tatooine">
+      </div>
+      <div class="col mb-3">
+        <label for="js-planet-climate" class="form-label">Clima</label>
+        <input class="form-control" id="js-planet-climate" rows="3" placeholder="Ex. Quente"></input>
+      </div>
+      <div class="col mb-3">
+        <label for="js-planet-terrain" class="form-label">Terreno</label>
+        <input class="form-control" id="js-planet-terrain" rows="3" placeholder="Ex. Desert"></input>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <button type="button" id="js-btn-submit" class="btn btn-primary space-right">Cadastrar</button>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" value="" id="js-force-create">
+          <label class="form-check-label" for="js-force-create">
+            Forçar criação
+          </label>
+        </div>
+      </div>
+    </div>
+  </form>
+  </div>
+</div>
+{% endblock %}
+{% block js %}
+<script>
+  function clearInputs() {
+    const inputs = document.getElementsByTagName('input')
+    if(inputs && inputs.length > 0){
+      Array.from(inputs).forEach(input => {
+        input.value = ''
+        if(input.checked) input.checked = false
+      })
+    }
+  }
+
+  /**
+  * @param {string} elementId ID do elemento a ser buscado.
+  */
+  const getById = (elementId) => document.getElementById(elementId)
+
+  /**
+  * @param {'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'} type Tipo de alert.
+  * @param {string} body Texto para o corpo do alert.
+  */
+  const showAlert = (type, body) => {
+    const response = getById('js-div-response')
+    response.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                          ${body}
+                          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                          </div>`
+  }
+
+  /**
+  * @param {boolean} state Mostrar carregando ou não
+  */
+  setLoading = (state) => {
+    const btnSubmit = getById('js-btn-submit')
+    if(state)
+      btnSubmit.innerHTML = IconLoading + " aguarde"
+    else {
+      btnSubmit.innerHTML = 'Cadastrar'
+    }
+  }
+
+  function createPlanet () {
+    setLoading(true)
+    const name = getById('js-planet-name').value
+    const terrain = getById('js-planet-terrain').value
+    const climate = getById('js-planet-climate').value
+
+    const force = getById('js-force-create').checked
+
+    const data = {
+      name,
+      terrain,
+      climate,
+      force
+    }
+
+    let requestHeaders = new Headers({
+      "Content-Type": "application/json",
+    });
+    let request = {
+      method: 'POST',
+      headers: requestHeaders,
+      body: JSON.stringify(data),
+      mode: 'cors',
+      cache: 'default'
+    };
+    fetch('http://localhost:5000/api/v1/planets', request)
+      .then(function (response) {
+        return response.json()
+      })
+      .then(function (res) {
+        console.log(res)
+        if(res.status < 299){
+          showAlert('success', res.message)
+        }else{
+          const status = res.status >= 500 ? 'danger' : 'warning'
+          showAlert(status, res.message)
+        }
+        setLoading(false)
+      })
+      .catch(function (err) {
+        showAlert('danger', "Não foi possível se comunicar com o servidor!")
+        setLoading(false)
+      })
+      
+  }
+  clearInputs()
+
+  const btnSubmit = getById('js-btn-submit')
+  btnSubmit.onclick = createPlanet
+
+
+</script>
+
+{% endblock %}
