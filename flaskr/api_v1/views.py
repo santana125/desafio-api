@@ -3,8 +3,8 @@ import requests, sys
 from flask import request, Response
 
 from . import api_v1_bp
-from app.models import Planet
-from app.utils.database import db
+from flaskr.models import Planet
+from flaskr.utils.database import db
 
 api_timeout = 5
 

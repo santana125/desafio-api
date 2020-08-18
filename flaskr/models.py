@@ -1,5 +1,5 @@
 from sqlalchemy_serializer import SerializerMixin
-from app.utils.database import db
+from flaskr.utils.database import db
 
 class Planet(db.Model, SerializerMixin):
   __tablename__ = 'planets'
